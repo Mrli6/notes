@@ -1,0 +1,9 @@
+1、VCS ---> Import into Version Control ---> Create Git Repository
+
+2、点OK，xml等文件会变红，代表未被追踪、监测到了文件，但没放入暂存区
+
+3、如何将文件放入暂存区？(放入暂存区后文件变绿)
+	方法一：右键文件 ---> Git ---> ADD
+	方法二：右键项目根目录 ---> Git ---> ADD
+
+4、右键项目根目录 ---> Git ---> Commit Directory(提交到本地库，文件变黑)

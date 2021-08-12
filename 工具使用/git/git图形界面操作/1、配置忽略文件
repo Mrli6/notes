@@ -1,0 +1,34 @@
+参考 https://www.bilibili.com/video/BV1vy4y1s7k6?p=27
+
+1、在 家目录 下创建 xxx.ignore文件
+	# Compiled class file
+	*.class
+
+	# Log file
+	*.log
+
+	# BlueJ files
+	*.ctxt
+
+	# Mobile Tools for Java (J2ME)
+	.mtj.tmp/# Package Files #
+	*.jar
+	*.war
+	*.nar
+	*.ear
+	*.zip
+	*.tar.gz
+	*.rar
+
+	hs_err_pid*
+
+	.classpath
+	.project
+	.settings
+	target
+	.idea
+	*.iml
+
+
+
+2、在修改.gitconfig内容（使用 "/"，而不是默认的 "\"）

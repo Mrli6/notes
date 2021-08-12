@@ -1,0 +1,7 @@
+1、Settings ---> Version Control ---> GitHub
+      如果没有GitHub，可以在Plugins下载GitHub插件
+
+2、点击 + ---> Use Token
+
+3、进入Github网页 ---> Settings ---> Deverloper Settins ---> Personal access tokens
+   ---> 起个口令名字并将权限全打勾 ---> Generate ---> 复制口令

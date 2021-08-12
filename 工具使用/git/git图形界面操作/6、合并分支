@@ -1,0 +1,5 @@
+1、正常合并
+    右下角 Git:master ---> 点合并进来的分支 ---> Merge into Current
+
+2、冲突合并
+    如果有冲突，点击 Merge 手动合并

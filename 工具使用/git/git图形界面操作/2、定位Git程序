@@ -1,0 +1,5 @@
+1、进入IDEA ---> 点击File ----> 点击settings
+
+2、点Version Control ---> 点Git
+
+3、选中 Git安装目录/bin/git.ext ---> test

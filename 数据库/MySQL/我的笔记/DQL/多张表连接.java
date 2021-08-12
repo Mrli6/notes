@@ -1,0 +1,20 @@
+三张表，四张表怎么连接？
+	语法：
+		select 
+			...
+		from
+			a
+		join
+			b
+		on
+			a和b的连接条件
+		join
+			c
+		on
+			a和c的连接条件
+		join
+			d
+		on
+			a和d的连接条件
+		
+		一条SQL中内连接和外连接可以混合。都可以出现！

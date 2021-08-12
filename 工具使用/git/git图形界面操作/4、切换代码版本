@@ -1,0 +1,7 @@
+1、查看版本信息
+	左下角点击 9:Version Control ---> 点击Log
+
+2、切换版本
+	点击需要切换的版本 ---> 右键 ---> Checkout Revision '......'
+
+疑问？checkout是切换分支，reset才是切换版本

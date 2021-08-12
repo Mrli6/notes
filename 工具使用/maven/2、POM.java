@@ -1,0 +1,3 @@
+Porject Object Model 项目对象模型
+
+pom.xml对于Maven工程是核心配置文件，与构建过程相关的一切设置都在这个文件中进行配置

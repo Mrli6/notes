@@ -1,0 +1,3 @@
+方法一：右键项目根目录 ---> Git ---> Repository ---> Push
+
+方法二：VCS ---> Git ---> Push ---> 右键Define Remote并复制github网页上的SSH
