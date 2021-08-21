@@ -16,8 +16,9 @@ mybatis链接池提供了3种方式的配置
 			主配置文件种的dataSource标签，type属性就是表示采用何种连接池方式
 	type属性的取值：
 			POOLED		采用传统的javax.sql.DataSource规范中的连接池
-			UNPOOLED	采用传统的获取链接的方式，虽实现了javax.sql.DataSource接口，但没有池的思							想，每次使用都会重新获取一个链接
-			JNDI		采用服务器提供的JNDI技术实现来获取DataSource对象，不同服务器所能拿到的							DataSource是不一样的。
+			UNPOOLED	采用传统的获取链接的方式，虽实现了javax.sql.DataSource接口，但没有池的思想，
+						每次使用都会重新获取一个链接
+			JNDI		采用服务器提供的JNDI技术实现来获取DataSource对象，不同服务器所能拿到的DataSource是不一样的。
 						注意：只有web或maven工程才能使用。
 						tomcat采用dbcp连接池
 ```
