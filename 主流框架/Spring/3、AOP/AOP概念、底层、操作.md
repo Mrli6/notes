@@ -127,7 +127,7 @@ public class JDKProxy {
 }
 
 //创建代理对象代码
-class  UserDaoProxy implements InvocationHandler {
+class UserDaoProxy implements InvocationHandler {
 
     //把实现类通过 有参构造 传递进来
     private Object obj;
@@ -476,7 +476,7 @@ public class PersonProxy {
 }
 ```
 
-```
+```java
 //增强类
 @Component
 @Aspect
