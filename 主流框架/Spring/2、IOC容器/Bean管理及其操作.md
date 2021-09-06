@@ -1,5 +1,7 @@
 # Spring有两种类型的Bean
 
+
+
 #### 普通Bean：在配置文件中定义bean类型就是返回类型
 
 ```xml
