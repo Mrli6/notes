@@ -167,7 +167,7 @@ public interface IUserDao {
             <dataSource type="POOLED">
                 <!-- 配置连接数据库的4个基本信息 -->
                 <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
-                <property name="url" value="jdbc:mysql://localhost:3306/user_db?serverTimezone=UTC"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/user_db?serverTimezone=UTC&amp;useSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8"/>
                 <property name="username" value="root"/>
                 <property name="password" value="123"/>
             </dataSource>
@@ -499,13 +499,48 @@ https://www.bilibili.com/video/BV1Db411s7F5?p=13&spm_id_from=pageDriver
 
 
 
+# 主配置文件映射器
+
+## 方式一：（推荐）
+
+```xml
+<mappers>
+    <mapper resource="com/kuang/dao/UserMapper.xml"/>
+</mappers>
+```
 
 
 
 
 
+## 方式二：
+
+```xml
+<mappers>
+    <mapper class="com.kuang.dao.UserMapper"/>
+</mappers>
+```
+
+注意点：
+
+- 接口和它的Mapper配置文件必须同名
+- 接口的它的Mapper配置文件必须在同一个包下 或 包结构相同
 
 
+
+
+
+## 方式三：
+
+```xml
+<mappers>
+    <package name="com.kuang.dao"/>
+</mappers>
+```
+
+注意点：
+
+- 接口和它的Mapper配置文件必须同名
 
 
 

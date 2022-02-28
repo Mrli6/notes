@@ -229,6 +229,18 @@ public class MybatisTest {
 
 ### 2.1.1 parameterType(输入类型)
 
+当实体中属性过多时，如果参数使用实体类，那么在改数据时，就需要为实体类参数中的每个属性赋值。
+
+为了避免这种繁琐的参数，就需要参数类型 map
+
+```xml
+<update id="updateUser" parameterType="map">
+        update user set password=#{key1} where id=#{key2};
+    </update>
+```
+
+
+
 
 
 ### 2.1.2 传递简单类型
@@ -496,10 +508,10 @@ https://www.bilibili.com/video/BV1Db411s7F5?p=30
 -->
 <typeAliases>
     <!-- type属性指定的是实体类全限定类名；alias属性指定别名，当指定了别名就不再区分大小写 -->
-    <typeAlias type="com.mybatis.domain.User" alias="user"></typeAlias>
+    <typeAlias type="com.mybatis.domain.User" alias="user" />
     
     <!-- 用于指定要配置别名的包，当指定之后，该包下的实体类都会注册别名，并且类名就是别名，不再区分大小写 -->
-    <package name="com.mybatis.domain"></package>
+    <package name="com.mybatis.domain" />
 </typeAliases>
 ```
 

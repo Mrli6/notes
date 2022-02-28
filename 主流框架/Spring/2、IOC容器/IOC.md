@@ -1,3 +1,13 @@
+# IOC理论推导
+
+```
+https://www.bilibili.com/video/BV1WE411d7Dv?p=3&spm_id_from=pageDriver
+```
+
+
+
+
+
 # IOC底层原理
 
 技术实现：xml解析、工厂模式、反射
@@ -17,6 +27,10 @@
 # IOC接口
 
 ## 	1、IOC思想基于IOC容器完成，IOC容器底层就是对象工厂
+
+
+
+
 
 
 

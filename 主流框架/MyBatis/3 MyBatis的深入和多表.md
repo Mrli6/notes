@@ -53,90 +53,63 @@ SqlSession session = factory.openSession(true);
 
 
 
+# 2、动态SQL
 
 
 
-
-
-
-
-
-# 2、mappers配置文件中的几个标签
-
-
-
-
-
-## 2.1 if标签
-
-
-
-接口
-
-```java
-/**
- * 根据参数条件查询数据
- * @param user 参数条件可以是id、名字、性别、地址...也可能没有条件
- * @return
-*/
-List<User> findByCondition(User user);
-```
-
-
-
-映射配置文件
+## 2.1 if
 
 ```xml
-<!-- 根据参数条件查询数据，test是执行条件，只有当test中为true，执行if里的语句 -->
-<select id="findByCondition" parameterType="com.mybatis.domain.User" resultType="com.mybatis.domain.User">
-    select * from user where 1=1
-    <if test="username != null">
-        and username = #{username}
+<select id="queryBlogIf" parameterType="map" resultType="blog">
+	SELECT * FROM blog WHERE 1=1
+    <if test="title != null">
+        AND title=#{title}
     </if>
-    <if test="sex != null">
-        and sex = #{sex}
+    <if test="author != null">
+        AND author=#{author}
     </if>
 </select>
 ```
 
-
-
-测试
-
-```java
-@Test
-public void testFindByCondition(){
-    User user = new User();
-    user.setUsername("老王");
-    user.setSex("女");
-    List<User> users = userDao.findByCondition(user);
-    for(User u : users){
-        System.out.println(u);
-    }
-}
-```
-
-
-
-
-
-
-
-## 2.2 where标签
-
-可以去掉 select * from user where 1=1 里的where 1=1
+改进where
 
 ```xml
-<!-- 根据参数条件查询数据 -->
-<select id="findByCondition" parameterType="com.mybatis.domain.User" resultType="com.mybatis.domain.User">
-    select * from user
+<select id="queryBlogIf" parameterType="map" resultType="blog">
+	SELECT * FROM blog
     <where>
-        <if test="username != null">
-            and username = #{username}
+        <if test="title != null">
+            AND title=#{title}
         </if>
-        <if test="sex != null">
-            and sex = #{sex}
+        <if test="author != null">
+            AND author=#{author}
         </if>
+    </where>
+</select>
+```
+
+where标签会自动去除 and 或 or
+
+
+
+
+
+## 2.2 choose
+
+```xml
+<select id="queryBlogChoose" parameterType="map" resultType="blog">
+    SELECT * FROM blog
+    <where>
+        <choose>
+            <when test="title != null">
+                AND title=#{title}
+            </when>
+			<when test="author != null">
+                AND author=#{author}
+            </when>
+            <otherwise>
+            	AND views > 1000
+            </otherwise>
+        </choose>
     </where>
 </select>
 ```
@@ -145,7 +118,13 @@ public void testFindByCondition(){
 
 
 
-## 2.3 foreach标签
+## 2.3 trim
+
+
+
+
+
+## 2.4 foreach
 
 在mysql中，会用到如下语句：
 
@@ -155,32 +134,12 @@ select * from uesr where id in(41,42,43,46);
 
 如何在mybatis中实现上述代码的功能呢？
 
-在QueryVo类中添加一个类型为List、属性名为ids的属性，并编写set and get方法
-
-
-
-接口
-
-```
-/**
-* 根据QueryVo中提供的ids集合查询数据
-* @param vo
-* @return
-*/
-List<User> findByIds(QueryVo vo);
-```
-
-
-
-映射配置文件
-
 ```xml
-<!-- 根据QueryVo中提供的ids集合查询数据 -->
 <select id="findByIds" resultType="com.mybatis.domain.User">
     select * from user
     <where>
         <if test="ids!=null and ids.size()>0">
-            <foreach collection="ids" open="and id in (" close=")" item="uid" separator=",">
+            <foreach item="uid" collection="ids" open="and id in (" separator="," close=")">
                 #{uid}
             </foreach>
         </if>
@@ -190,32 +149,13 @@ List<User> findByIds(QueryVo vo);
 
 
 
-测试
-
-```java
-@Test
-public void testFindByIds(){
-    QueryVo vo = new QueryVo();
-    List<Integer> list = new ArrayList<Integer>();
-    list.add(41);
-    list.add(42);
-    list.add(43);
-    list.add(46);
-    vo.setIds(list);
-    List<User> users = userDao.findByIds(vo);
-    for(User u : users){
-        System.out.println(u);
-    }
-}
-```
 
 
 
 
+## 2.5 sql片段
 
-## 2.4 sql标签
-
-在以上的代码中，经常看到 select * from user 这样的重复代码，我们可以使用标签抽取这个重复部分
+经常看到 select * from user 这样的重复代码，我们可以使用标签抽取这个重复部分
 
 ```xml
 <sql id="defaultUser">
@@ -230,8 +170,6 @@ public void testFindByIds(){
     <include refid="defaultUser"></include>
 </select>
 ```
-
-
 
 
 
@@ -291,30 +229,89 @@ https://www.bilibili.com/video/BV1Db411s7F5?p=49
 
 
 
+## 3.2 多对一查询
 
+### 方式一：
 
+```xml
+<resultMap id="StudentTeacher" type="Student">
+	<result property="id" column="sid"/>
+    <result property="name" column="sname"/>
+    <association property="teacher" javaType="Teacher">
+    	<result property="name" column="tname"/>
+    </association>
+</resultMap>
 
+<select id = "getStudent" resultMap="StudentTeacher">
+	SELECT s.id AS sid, s.name AS sname, t.name AS tname
+    FROM student s, teacher t
+    WHERE s.tid = t.id
+</select>
+```
 
 
 
+### 方式二：
 
+```xml
+<resultMap id="StudentTeacher" type="Student">
+    <result property="id" column="id"/>
+    <result property="name" column="name"/>
+    <assocation property="teacher" column="tid" javaType="Teacher" select="getTeacher"/>
+</resultMap>
 
+<select id = "getStudent" resultMap="StudentTeacher">
+	SELECT * from student
+</select>
 
+<select id = "getTeacher" resultMap="Teacher">
+	SELECT * from teacher where id=#{id}
+</select>
+```
 
 
 
 
 
+## 3.3 一对多查询
 
+### 方式一：
 
-## 3.2 一对多查询
+```xml
+<select id="getTeacher" resultMap="TeacherStudent">
+	SELECT s.id AS sid, s.name AS sname, t.name AS tname, t.id AS tid
+    FROM student s, teacher t
+    WHERE s.tid = t.id and t.id = #{id}
+</select>
 
+<resultMap id="TeacherStudent" type="Teacher">
+	<result property="id" column="tid"/>
+    <result property="name" column="tname"/>
+    <collection property="students" ofType="Student">
+    	<result property="id" column="sid"/>
+        <result property="name" column="sname"/>
+        <result property="tid" column="tid"/>
+    </collection>
+</resultMap>
+```
 
 
 
+### 方式二：
 
+```xml
+<resultMap id="TeacherStudent" type="Teacher">
+	<collection property="students" javaType="ArrayList" ofType="Student" select="getStudentByTeacherId" column="id"/>
+</resultMap>
 
+<select id="getTeacher" resultMap="TeacherStudent">
+	SELECT * FROM teacher WHERE id = #{tid}
+</select>
 
+<select id="getStudentByTeacherId" resultType="Student">
+	SELECT * FROM student WHERE tid = #{tid}
+</select>
+```
 
 
 
@@ -322,6 +319,7 @@ https://www.bilibili.com/video/BV1Db411s7F5?p=49
 
 
 
+## 3.4 mybatis维护多对多关系
 
 
 
@@ -329,53 +327,27 @@ https://www.bilibili.com/video/BV1Db411s7F5?p=49
 
 
 
+# 4、分表查询
 
 
 
+## 4.1 limit
 
+使用哈希表做参数
 
+```
+https://www.bilibili.com/video/BV1NE411Q7Nx?p=13&spm_id_from=pageDriver
+```
 
 
 
 
 
+## 4.2  RowBounds
 
-
-
-
-
-
-## 3.3 mybatis维护多对多关系
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
+https://www.bilibili.com/video/BV1NE411Q7Nx?p=14&spm_id_from=pageDriver
+```
 
 
 

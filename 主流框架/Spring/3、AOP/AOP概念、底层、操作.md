@@ -300,6 +300,18 @@ execution(* com.atguigu.dao.*.*(..))
 
 
 
+# 请注意下面方式
+
+下面的方式都是 基于自定义的api，没有办法在增强类中使用被增强方法的属性等信息，具有局限性
+
+建议观看
+
+```
+https://www.bilibili.com/video/BV1WE411d7Dv?p=20&spm_id_from=pageDriver
+```
+
+视频中的方式是 基于spring原生api的，每个通知都有对应的接口，只需创建实现这些接口就行，这种方式可以获取被增强方法的属性等信息，具有更高的功能性。
+
 
 
 
@@ -572,7 +584,7 @@ public class BookProxy {
     <!--配置aop增强-->
     <aop:config>
         <!--切入点-->
-        <aop:pointcut id="p" expression="execution(* proxyxml.Book.buy())"></aop:pointcut>
+        <aop:pointcut id="p" expression="execution(* proxyxml.Book.buy())"/>
 
         <!--配置切面-->
         <aop:aspect ref="bookProxy">

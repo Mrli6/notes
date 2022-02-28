@@ -454,7 +454,7 @@ staff[0] = boss;
 
 ​	return field1 == other.field1
 
-​		&& Object.equals(field2, other.field2)
+​		&& Objects.equals(field2, other.field2)
 
 ​		&& ...
 
@@ -753,6 +753,167 @@ class TraceHandler implements InvocationHandler{
 
 # 第七章 异常、断言和日志
 
+## 异常
+
+### 必须抛出所有可能的受查异常
+
+​	派生于Error类或RuntimeException类的所有异常称为 非受查（unchecked）异常，所有其他的异常称为 受查（checked）异常。
+
+​	一个方法必须声明所有可能抛出的受查异常，而 非受查异常要么不可控制（Error），要么就应该避免发生（RuntimeException）。
+
+
+
+
+
+### 子类抛出的异常不能比超类的更通用
+
+​	子类方法可以抛出更特定的异常，或者根本不抛出任何异常。
+
+​	超类没有抛出任何受查异常，子类也不能抛出任何受查异常。
+
+
+
+
+
+### 捕获异常时的异常变量
+
+```java
+catch(FileNotFoundException | UnknownHostException e){...}
+```
+
+​	捕获多个异常时，异常变量隐含为 final 变量
+
+
+
+
+
+### 将原始异常设置为新异常
+
+```java
+try{
+	...
+}catch(SQLException e){
+	Throwable se = new ServletException();
+	se.initCause(e);
+	throw se;
+}
+```
+
+可以使用 `Throwable e = se.getCause()` 来重新获得原始异常。
+
+​	这个包装技术可以将 受查异常 包装成 运行时异常 抛出
+
+
+
+
+
+### 抛出更具体异常
+
+```java
+try{
+	...
+}catch(Exception e){
+	logger.log(level, message, e);
+	throw e;
+}
+```
+
+假设以上代码在方法 `public void update() throws SQLException` 里面，在 java7 之前编译器查看 catch 块中的 throw 语句，然后查看 e 的类型，会指出这个方法可以抛出任何 Exception 而不只是 SQLException。现在，编译器会跟踪到 e 来自 try 块。
+
+
+
+
+
+### 解耦合try/catch和try/finally
+
+```java
+InputStream in = ...;
+try{	// 确保报告出现的错误
+    try{	// 确保关闭输入流
+        ...
+    }finally{
+        in.close();
+    }
+}catch(IOException e){
+    ...
+}
+```
+
+
+
+
+
+### 带有return的finally
+
+​	当 finally 子句包含 return 时，假设利用 return 语句从 try 语句块中退出。在方法返回之前，finally 子句的内容将被执行。如果 finally 子句中也有 return 语句，这个返回值将覆盖原始的返回值：
+
+```java
+public static int f(int n){
+    try{
+        int r = n * n;
+        return r;
+    }finally{
+        if(n == 2) return 0;
+    }
+}
+```
+
+如果调用 f(2)，结果是 0。
+
+
+
+
+
+### 带资源的try语句
+
+```java
+try(Scanner in = new Scanner(new FileInputStream(“d:\\haha.txt”));  
+    PrintWriter out = new PrintWriter(“d:\\hehe.txt”)) {  
+    while(in.hasNext()) {  
+        out.println(in.next().toUpperCase());  
+    }  
+}
+```
+
+不论这个块如何退出，in 和 out 都会关闭。尽可能使用这种方式。
+
+
+
+
+
+### 分析堆栈轨迹元素
+
+```java
+Thorwable t = new Throwable();
+StackTraceElement[] frames = t.getStackTrace();
+for(StackTraceElement frame : frames){
+    System.out.println(f);
+}
+```
+
+详情见《核心技术》P280
+
+
+
+
+
+### 使用异常机制的技巧
+
+- 异常处理不能代替简单的测试
+
+  ​	捕获异常的时间开销很大
+
+- 不要过分地细化异常
+
+- 利用异常层次结构
+
+- 不要压制异常
+
+- 在检测错误是，“苛刻”要比放任更好
+
+- 不要羞于传递异常
+
+详情见《核心技术》P283
 
 
 
@@ -760,12 +921,299 @@ class TraceHandler implements InvocationHandler{
 
 
 
+## 断言
+
+### 语法
+
+```java
+assert 条件;
+assert 条件 : 表达式;
+```
+
+如果条件是 false，则抛出一个 AssertionError 异常。在第二种形式中，表达式将被传入 AssertionError 的构造器，并转换成一个消息字符串。
 
 
 
 
 
 
+
+## 日志
+
+### 基本日志
+
+​	要生成简单的日志，可以使用全局日志记录器并调用其 info 方法：
+
+```java
+Logger.getGlobal().info("hello");
+```
+
+​	取消所有的日志：
+
+```java
+Logger.getGlobal().setLevel(Level.OFF);
+```
+
+
+
+
+
+### 高级日志
+
+详情见《核心技术》P289
+
+
+
+
+
+
+
+# 第八章 泛型程序设计
+
+## 为什么使用泛型
+
+​	以 ArrayList 举例：在泛型之前，ArrayList类维护一个 Object数组，可以在这个数组里插入任意引用类型，在使用时必须强制类型转换。如果需要一个字符串数组链表，不小心添加了一个其他类型，在使用时会出现强制类型转换异常。
+
+​	使用泛型，可以将强制类型转换异常 变为 编译错误，使得程序具有更好的可读性和安全性。
+
+
+
+
+
+## 泛型方法
+
+```java
+class ArrayAlg{
+    public static <T> T getMiddle(T... a){
+        return a[a.length/2];
+    }
+}
+```
+
+这个方法可以定义在普通类中，也可以定义在泛型类中。
+
+​	使用如下方法调用：
+
+```java
+String middle = ArrayAlg.<String>getMiddle("a","b","c");
+String middle = ArrayAlg.getMiddle("a","b","c");	// 编译器会推断T一定是String
+```
+
+​	如果想知道编译器的推断结果，可以有目的的引入一个错误：将 `ArrayAlg.getMiddle("a",0,null);` 的结果赋给 JButton，查看错误报告:  `found: java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends ...` ，大意就是可以将结果赋给 Object 、Serializable 、Comparable。
+
+
+
+
+
+## 类型变量的限定
+
+```java
+public static <T extends Comparable & Serializable> T min(T[] a)...
+```
+
+将 T 限定为 实现Comparable和Serializable接口的类。
+
+
+
+
+
+## 泛型代码和虚拟机
+
+​	虚拟机没有泛型类型对象，所有对象都属于普通类。
+
+​	无论何时定义一个泛型类型，都自动提供了一个相应的原始类型。原始类型的名字就是删除类型参数后的泛型类型名。
+
+​	擦除类型变量，并替换为限定类型（有多个限定类型的，原始类型用第一个限定的类型来替换；无限定的变量用 Object 替换）
+
+```java
+public class Pair<T>{
+    private T first;
+    ...
+} 
+/*	替换为 
+    public class Pair{
+    	private Object first;
+    	...
+    }
+*/
+
+public class Interval<T extends Comparable & Serializable>{
+    private T lower;
+    ...
+}
+/*	替换为
+	public class Interval{
+		private Comparable lower;
+		...
+	}
+*/
+```
+
+
+
+
+
+## Java泛型转换的事实
+
+- 虚拟机中没有泛型，只有普通的类和方法。
+
+- 所有的类型参数都用它们的限定类型替换。
+
+- 桥方法被合成来保持多态。
+
+  ​	详情见《核心技术》P318
+
+- 为保持类型安全性，必要时插入强制类型转换。
+
+
+
+
+
+## 约束与局限性
+
+- 不能使用基本类型实例化类型参数
+
+  ​	没有 `Pair<double>` ，只有 `Pair<Double>` 。
+
+- 运行时类型查询只适用于原始类型
+
+  ```java
+  if(a instanceof Pair<String>)	// error
+  if(a instanceof Pair<T>)	// error
+  Pair<String> p = (Pair<String>) a；	// warning--can only test that a is a Pair
+      
+  Pair<String> s = ...;
+  Pair<Employee> e = ...;
+  if(s.getClass() == e.getClass())	// true，两次调用 getClass 方法都返回 Pair.class
+  ```
+
+- 不能创建参数化类型的数组
+
+  ```java
+  Pair<String>[] p = new Pair<String>[10]; // error
+  // 只能使用如下方法
+  ArrayList<Pair<String>> p = new ArrayList<>();
+  ```
+
+- Varargs警告
+- 不是实例化类型变量
+- 不能构造泛型数组
+- 泛型类的静态上下文中类型变量无效
+- 不能抛出或捕获泛型类的实例
+- 可以消除对受查异常的检查
+- 注意擦除后的冲突
+
+详情见《核心技术》P320
+
+
+
+
+
+## 泛型类型的继承规则
+
+​	考虑 `Pair<T>` ，Employee是Manager的父类，但是 `Pair<Employee>` 和 `Pair<Manager>` 没有任何关系，将 `Pair<Manager>` 转换赋值给 `Pair<Employee>` 是不合法的。
+
+​	`ArrayList<T>` 实现了 `List<T>` 接口，意味着 `ArrayList<Manager>` 可以转换为 `List<Manager>` ，但不能 转换为 `List<Employee>` 。
+
+
+
+
+
+## 通配符类型
+
+​	对于 `Pair<T>` 中 `Pair<Manager>` 不能转换为 `Pair<Employee` 的问题，可以使用 通配符类型 解决。
+
+​	例如：通配符类型 `Pair<? extends Employee` 表示任何泛型Pair类型，它的类型参数是 Employee 的子类。
+
+详情见《核心技术》P330
+
+
+
+
+
+## 子类型限定和超类型限定
+
+​	对于子类型限定 `Pair<? extends Employee>` ，其中的get、set方法如下
+
+```java
+? extends Employee getFirst(){...}
+void setFirst(? extends Employee){...}	// 编译器只知需要Employee的子类，但不知道具体是什么，所以拒绝写入
+```
+
+​	对于超类型限定 `Pair<? super Manager>` ，其中的get、set方法如下
+
+```java
+? super Manager getFirst(){...}		// 拒绝读取
+void setFirst(? super Manager){...}
+```
+
+
+
+
+
+
+
+# 第九章 集合
+
+## 具体的集合
+
+### 散列集
+
+​	如果想要查看某个指定的元素，却忘记了它的位置，就需要访问所有元素，直到找到为止，如果集合有很多元素，将会消耗很多时间。
+
+​	如果不在意元素的顺序，可以使用 散列表 快速查找。缺点就是 无法控制元素出现的次序
+
+​	要想查找 散列表 中对象的位置，就要计算它的 散列码，然后与桶的总数取余，所得结果就是保存这个对象的桶的索引
+
+
+
+### 树集
+
+​	将加入其中的元素自动排序。
+
+
+
+### 双端队列
+
+​	双端队列可以在头部和尾部同时添加或删除。
+
+​	Java 6中引入了 Deque 接口，并由 ArrayDeque 和 LinkedList 类实现。
+
+
+
+### 优先级队列
+
+​	优先级队列并没有对所有的元素排序，但删除却总是删除剩余元素中优先级最小的元素。
+
+​	优先级队列使用的是 堆。堆是一个可以自我调整的二叉树，对树执行添加和删除操作，可以让最小的元素移动到根
+
+
+
+
+
+## 映射
+
+​	hashmap、treemap
+
+
+
+
+
+## 视图与包装器
+
+​	Arrays类的静态方法 asList 将返回一个包装了普通 java 数组的 List 包装器。`Arrays.asList(...)` 返回的不是 ArrayList ，而是一个视图对象，带有访问底层数组的 set、get 方法。改变数组大小的所有方法（如 add、remove）都会抛出异常。
+
+​	`Collections.nCopies(n, anObject)` 将返回一个实现了 List 接口的不可修改的对象，并给人一种包含 n 个元素，每个元素都像是一个 anObject 的错觉。
+
+​	视图只是包装了接口而不是实际的集合对象，所以只能访问接口中定义的方法。
+
+
+
+
+
+
+
+# 第十四章 并发
 
 
 
